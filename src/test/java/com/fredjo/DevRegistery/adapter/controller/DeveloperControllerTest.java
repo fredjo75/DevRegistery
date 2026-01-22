@@ -85,7 +85,7 @@ class DeveloperControllerTest {
 
         mockMvc.perform(post("/developer/1/languages")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Java\"}"))
+                        .content("{\"name\":\"Java\",\"creatorsName\":\"James Gosling\"}"))
                 .andExpect(status().isOk());
     }
 

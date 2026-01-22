@@ -123,19 +123,26 @@ class DeveloperServiceTest {
     void getLanguagesByDeveloperId_returnsListOfProgrammingLanguageDto_whenIdExists() {
         Long id = 1L;
         Developer developer = new Developer();
-        Set<ProgrammingLanguage> languages = new HashSet<>(Arrays.asList(new ProgrammingLanguage(), new ProgrammingLanguage()));
-        List<ProgrammingLanguageDto> languageDtos = Arrays.asList(new ProgrammingLanguageDto(), new ProgrammingLanguageDto());
+        ProgrammingLanguage lang1 = new ProgrammingLanguage();
+        lang1.setId(1L);
+        ProgrammingLanguage lang2 = new ProgrammingLanguage();
+        lang2.setId(2L);
+        Set<ProgrammingLanguage> languages = new LinkedHashSet<>(Arrays.asList(lang1, lang2));
+        ProgrammingLanguageDto langDto1 = new ProgrammingLanguageDto();
+        ProgrammingLanguageDto langDto2 = new ProgrammingLanguageDto();
 
         developer.setLanguages(languages);
 
         when(developerRepository.findById(id)).thenReturn(Optional.of(developer));
-        when(modelMapper.map(any(ProgrammingLanguage.class), eq(ProgrammingLanguageDto.class)))
-                .thenReturn(languageDtos.get(0), languageDtos.get(1));
+        when(modelMapper.map(lang1, ProgrammingLanguageDto.class)).thenReturn(langDto1);
+        when(modelMapper.map(lang2, ProgrammingLanguageDto.class)).thenReturn(langDto2);
 
         Iterable<ProgrammingLanguageDto> result = developerService.getLanguagesByDeveloperId(id);
+        List<ProgrammingLanguageDto> resultList = (List<ProgrammingLanguageDto>) result;
 
-        assertEquals(2, ((List<ProgrammingLanguageDto>) result).size());
-        assertEquals(languageDtos, result);
+        assertEquals(2, resultList.size());
+        assertTrue(resultList.contains(langDto1));
+        assertTrue(resultList.contains(langDto2));
     }
 
     @Test

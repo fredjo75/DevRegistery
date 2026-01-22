@@ -5,6 +5,7 @@ import com.fredjo.DevRegistery.application.dto.ProgrammingLanguageDto;
 import com.fredjo.DevRegistery.domain.entity.Developer;
 import com.fredjo.DevRegistery.domain.entity.ProgrammingLanguage;
 import com.fredjo.DevRegistery.infra.repository.DeveloperRepository;
+import com.fredjo.DevRegistery.utils.DeveloperNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -83,16 +84,21 @@ public class DeveloperService {
      *
      * @param id                     the ID of the developer
      * @param programmingLanguageDto the programming language data transfer object
+     * @throws DeveloperNotFoundException if the developer is not found
      */
     @Transactional
     public void addLanguageToDeveloper(Long id, ProgrammingLanguageDto programmingLanguageDto) {
         logger.info("Adding language to developer with id: {}", id);
-        developerRepository.findById(id).ifPresent(developer -> {
-            Set<ProgrammingLanguage> languages = developer.getLanguages();
-            languages.add(modelMapper.map(programmingLanguageDto, ProgrammingLanguage.class));
+        Developer developer = developerRepository.findById(id)
+                .orElseThrow(() -> new DeveloperNotFoundException("Developer not found with id: " + id));
+
+        Set<ProgrammingLanguage> languages = developer.getLanguages();
+        if (languages == null) {
+            languages = new java.util.HashSet<>();
             developer.setLanguages(languages);
-            developerRepository.save(developer);
-        });
+        }
+        languages.add(modelMapper.map(programmingLanguageDto, ProgrammingLanguage.class));
+        developerRepository.save(developer);
     }
 
     /**

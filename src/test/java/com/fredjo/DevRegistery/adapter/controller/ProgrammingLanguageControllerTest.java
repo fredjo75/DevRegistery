@@ -42,11 +42,12 @@ class ProgrammingLanguageControllerTest {
     void createProgrammingLanguage_returnsCreatedProgrammingLanguageDto() throws Exception {
         ProgrammingLanguageDto programmingLanguageDto = new ProgrammingLanguageDto();
         programmingLanguageDto.setName("Java");
+        programmingLanguageDto.setCreatorsName("James Gosling");
         when(programmingLanguageService.saveProgrammingLanguage(any(ProgrammingLanguageDto.class))).thenReturn(programmingLanguageDto);
 
         mockMvc.perform(post("/programming_language")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Java\"}"))
+                        .content("{\"name\":\"Java\",\"creatorsName\":\"James Gosling\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Java"));
     }

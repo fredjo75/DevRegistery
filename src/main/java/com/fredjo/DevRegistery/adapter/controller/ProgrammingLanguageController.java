@@ -3,6 +3,7 @@ package com.fredjo.DevRegistery.adapter.controller;
 import com.fredjo.DevRegistery.application.dto.DeveloperDto;
 import com.fredjo.DevRegistery.application.dto.ProgrammingLanguageDto;
 import com.fredjo.DevRegistery.application.services.ProgrammingLanguageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ public class ProgrammingLanguageController {
      * @return the ResponseEntity with the created ProgrammingLanguageDto
      */
     @PostMapping
-    public ResponseEntity<ProgrammingLanguageDto> createProgrammingLanguage(@RequestBody ProgrammingLanguageDto requestBody) {
+    public ResponseEntity<ProgrammingLanguageDto> createProgrammingLanguage(@Valid @RequestBody ProgrammingLanguageDto requestBody) {
         logger.info("Creating new programming language");
         ProgrammingLanguageDto savedLanguage = programmingLanguageService.saveProgrammingLanguage(requestBody);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()

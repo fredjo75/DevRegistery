@@ -3,6 +3,7 @@ package com.fredjo.DevRegistery.adapter.controller;
 import com.fredjo.DevRegistery.application.dto.DeveloperDto;
 import com.fredjo.DevRegistery.application.dto.ProgrammingLanguageDto;
 import com.fredjo.DevRegistery.application.services.DeveloperService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class DeveloperController {
      * @return the ResponseEntity with the created DeveloperDto
      */
     @PostMapping
-    public ResponseEntity<DeveloperDto> createDeveloper(@RequestBody DeveloperDto requestBody) {
+    public ResponseEntity<DeveloperDto> createDeveloper(@Valid @RequestBody DeveloperDto requestBody) {
         logger.info("Creating new developer");
         DeveloperDto savedDeveloper = developerService.saveDeveloper(requestBody);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -73,7 +74,7 @@ public class DeveloperController {
      * @return the ResponseEntity with status 200 OK
      */
     @PostMapping("/{id}/languages")
-    public ResponseEntity<Void> addLanguageToDeveloper(@PathVariable Long id, @RequestBody ProgrammingLanguageDto requestBody) {
+    public ResponseEntity<Void> addLanguageToDeveloper(@PathVariable Long id, @Valid @RequestBody ProgrammingLanguageDto requestBody) {
         logger.info("Adding language to developer with id: {}", id);
         developerService.addLanguageToDeveloper(id, requestBody);
         return ResponseEntity.ok().build();

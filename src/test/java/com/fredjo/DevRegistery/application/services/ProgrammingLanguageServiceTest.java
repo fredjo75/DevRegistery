@@ -130,19 +130,25 @@ class ProgrammingLanguageServiceTest {
     void getDevelopersByProgrammingLanguageId_returnsListOfDeveloperDto_whenIdExists() {
         Long id = 1L;
         ProgrammingLanguage programmingLanguage = new ProgrammingLanguage();
-        Set<Developer> developers = new HashSet<>(Arrays.asList(new Developer(), new Developer()));
-        List<DeveloperDto> developerDtos = Arrays.asList(new DeveloperDto(), new DeveloperDto());
+        Developer dev1 = new Developer();
+        dev1.setId(1L);
+        Developer dev2 = new Developer();
+        dev2.setId(2L);
+        Set<Developer> developers = new LinkedHashSet<>(Arrays.asList(dev1, dev2));
+        DeveloperDto devDto1 = new DeveloperDto();
+        DeveloperDto devDto2 = new DeveloperDto();
 
         programmingLanguage.setDevelopers(developers);
 
         when(programmingLanguageRepository.findById(id)).thenReturn(Optional.of(programmingLanguage));
-        when(modelMapper.map(any(Developer.class), eq(DeveloperDto.class)))
-                .thenReturn(developerDtos.get(0), developerDtos.get(1));
+        when(modelMapper.map(dev1, DeveloperDto.class)).thenReturn(devDto1);
+        when(modelMapper.map(dev2, DeveloperDto.class)).thenReturn(devDto2);
 
         List<DeveloperDto> result = programmingLanguageService.getDevelopersByProgrammingLanguageId(id);
 
         assertEquals(2, result.size());
-        assertEquals(developerDtos, result);
+        assertTrue(result.contains(devDto1));
+        assertTrue(result.contains(devDto2));
     }
 
     @Test
