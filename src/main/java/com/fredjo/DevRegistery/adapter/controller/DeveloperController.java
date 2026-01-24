@@ -18,7 +18,7 @@ import java.util.Optional;
  * REST controller for managing developers.
  */
 @RestController
-@RequestMapping("/developer")
+@RequestMapping("/v1/developer")
 @RequiredArgsConstructor
 public class DeveloperController {
 
@@ -90,5 +90,32 @@ public class DeveloperController {
     public ResponseEntity<Iterable<ProgrammingLanguageDto>> getLanguagesByDeveloperId(@PathVariable Long id) {
         logger.info("Fetching languages for developer with id: {}", id);
         return ResponseEntity.ok(developerService.getLanguagesByDeveloperId(id));
+    }
+
+    /**
+     * Updates an existing developer.
+     *
+     * @param id the ID of the developer to update
+     * @param requestBody the updated developer data transfer object
+     * @return the ResponseEntity with the updated DeveloperDto
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<DeveloperDto> updateDeveloper(@PathVariable Long id, @Valid @RequestBody DeveloperDto requestBody) {
+        logger.info("Updating developer with id: {}", id);
+        DeveloperDto updatedDeveloper = developerService.updateDeveloper(id, requestBody);
+        return ResponseEntity.ok(updatedDeveloper);
+    }
+
+    /**
+     * Deletes a developer by its ID.
+     *
+     * @param id the ID of the developer to delete
+     * @return the ResponseEntity with status 204 No Content
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDeveloper(@PathVariable Long id) {
+        logger.info("Deleting developer with id: {}", id);
+        developerService.deleteDeveloperById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -114,4 +114,25 @@ public class ProgrammingLanguageService {
         }
         return new ArrayList<>();
     }
+
+    /**
+     * Updates an existing programming language.
+     *
+     * @param id the ID of the programming language to update
+     * @param programmingLanguageDto the updated programming language data transfer object
+     * @return the updated ProgrammingLanguageDto
+     * @throws ProgrammingLanguageNotFoundException if the programming language is not found
+     */
+    @Transactional
+    public ProgrammingLanguageDto updateProgrammingLanguage(Long id, ProgrammingLanguageDto programmingLanguageDto) {
+        logger.info("Updating programming language with id: {}", id);
+        ProgrammingLanguage existingLanguage = programmingLanguageRepository.findById(id)
+                .orElseThrow(() -> new ProgrammingLanguageNotFoundException("Programming language not found with id: " + id));
+
+        existingLanguage.setName(programmingLanguageDto.getName());
+        existingLanguage.setCreatorsName(programmingLanguageDto.getCreatorsName());
+
+        ProgrammingLanguage updatedLanguage = programmingLanguageRepository.save(existingLanguage);
+        return modelMapper.map(updatedLanguage, ProgrammingLanguageDto.class);
+    }
 }

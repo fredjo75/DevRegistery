@@ -1,5 +1,6 @@
 package com.fredjo.DevRegistery.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,9 +22,10 @@ public class Developer {
     private String firstName;
     private String lastName;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinTable(name = "developer_programming_language",
             joinColumns = @JoinColumn(name = "developer_id"),
             inverseJoinColumns = @JoinColumn(name = "programming_language_id"))
+    @JsonManagedReference
     private Set<ProgrammingLanguage> languages = new HashSet<>();
 }

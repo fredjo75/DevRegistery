@@ -3,6 +3,7 @@ package com.fredjo.DevRegistery.adapter.controller;
 import com.fredjo.DevRegistery.application.dto.DeveloperDto;
 import com.fredjo.DevRegistery.application.dto.ProgrammingLanguageDto;
 import com.fredjo.DevRegistery.application.services.DeveloperService;
+import com.fredjo.DevRegistery.config.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,8 +17,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -34,14 +34,16 @@ class DeveloperControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(developerController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(developerController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
     }
 
     @Test
     void getAllDevelopers_returnsListOfDeveloperDto() throws Exception {
         when(developerService.getAllDevelopers()).thenReturn(Arrays.asList(new DeveloperDto(), new DeveloperDto()));
 
-        mockMvc.perform(get("/developer"))
+        mockMvc.perform(get("/v1/developer"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }
@@ -49,11 +51,12 @@ class DeveloperControllerTest {
     @Test
     void createDeveloper_returnsCreatedDeveloperDto() throws Exception {
         DeveloperDto developerDto = new DeveloperDto();
+        developerDto.setId(1L);
         developerDto.setFirstName("John");
         developerDto.setLastName("Doe");
         when(developerService.saveDeveloper(any(DeveloperDto.class))).thenReturn(developerDto);
 
-        mockMvc.perform(post("/developer")
+        mockMvc.perform(post("/v1/developer")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"firstName\":\"John\", \"lastName\":\"Doe\"}"))
                 .andExpect(status().isCreated())
@@ -64,18 +67,21 @@ class DeveloperControllerTest {
     @Test
     void getDeveloperById_returnsDeveloperDto_whenIdExists() throws Exception {
         DeveloperDto developerDto = new DeveloperDto();
+        developerDto.setFirstName("John");
+        developerDto.setLastName("Doe");
         when(developerService.getDeveloperById(1L)).thenReturn(Optional.of(developerDto));
 
-        mockMvc.perform(get("/developer/1"))
+        mockMvc.perform(get("/v1/developer/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value(developerDto.getFirstName()));
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"));
     }
 
     @Test
     void getDeveloperById_returnsNotFound_whenIdDoesNotExist() throws Exception {
         when(developerService.getDeveloperById(1L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/developer/1"))
+        mockMvc.perform(get("/v1/developer/1"))
                 .andExpect(status().isNotFound());
     }
 
@@ -83,7 +89,7 @@ class DeveloperControllerTest {
     void addLanguageToDeveloper_returnsOk_whenDeveloperExists() throws Exception {
         doNothing().when(developerService).addLanguageToDeveloper(eq(1L), any(ProgrammingLanguageDto.class));
 
-        mockMvc.perform(post("/developer/1/languages")
+        mockMvc.perform(post("/v1/developer/1/languages")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Java\",\"creatorsName\":\"James Gosling\"}"))
                 .andExpect(status().isOk());
@@ -93,8 +99,32 @@ class DeveloperControllerTest {
     void getLanguagesByDeveloperId_returnsListOfProgrammingLanguageDto() throws Exception {
         when(developerService.getLanguagesByDeveloperId(1L)).thenReturn(Arrays.asList(new ProgrammingLanguageDto(), new ProgrammingLanguageDto()));
 
-        mockMvc.perform(get("/developer/1/languages"))
+        mockMvc.perform(get("/v1/developer/1/languages"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
+    }
+
+    @Test
+    void updateDeveloper_returnsUpdatedDeveloperDto() throws Exception {
+        DeveloperDto developerDto = new DeveloperDto();
+        developerDto.setId(1L);
+        developerDto.setFirstName("Jane");
+        developerDto.setLastName("Smith");
+        when(developerService.updateDeveloper(eq(1L), any(DeveloperDto.class))).thenReturn(developerDto);
+
+        mockMvc.perform(put("/v1/developer/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"firstName\":\"Jane\", \"lastName\":\"Smith\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Jane"))
+                .andExpect(jsonPath("$.lastName").value("Smith"));
+    }
+
+    @Test
+    void deleteDeveloper_returnsNoContent() throws Exception {
+        doNothing().when(developerService).deleteDeveloperById(1L);
+
+        mockMvc.perform(delete("/v1/developer/1"))
+                .andExpect(status().isNoContent());
     }
 }

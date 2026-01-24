@@ -161,4 +161,44 @@ class ProgrammingLanguageServiceTest {
 
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void updateProgrammingLanguage_updatesAndReturnsProgrammingLanguageDto_whenIdExists() {
+        Long id = 1L;
+        ProgrammingLanguageDto programmingLanguageDto = new ProgrammingLanguageDto();
+        programmingLanguageDto.setName("Python");
+        programmingLanguageDto.setCreatorsName("Guido van Rossum");
+
+        ProgrammingLanguage existingLanguage = new ProgrammingLanguage();
+        existingLanguage.setId(id);
+        existingLanguage.setName("Java");
+        existingLanguage.setCreatorsName("James Gosling");
+
+        ProgrammingLanguage updatedLanguage = new ProgrammingLanguage();
+        updatedLanguage.setId(id);
+        updatedLanguage.setName("Python");
+        updatedLanguage.setCreatorsName("Guido van Rossum");
+
+        when(programmingLanguageRepository.findById(id)).thenReturn(Optional.of(existingLanguage));
+        when(programmingLanguageRepository.save(existingLanguage)).thenReturn(updatedLanguage);
+        when(modelMapper.map(updatedLanguage, ProgrammingLanguageDto.class)).thenReturn(programmingLanguageDto);
+
+        ProgrammingLanguageDto result = programmingLanguageService.updateProgrammingLanguage(id, programmingLanguageDto);
+
+        assertEquals("Python", result.getName());
+        assertEquals("Guido van Rossum", result.getCreatorsName());
+        verify(programmingLanguageRepository, times(1)).save(existingLanguage);
+    }
+
+    @Test
+    void updateProgrammingLanguage_throwsProgrammingLanguageNotFoundException_whenIdDoesNotExist() {
+        Long id = 1L;
+        ProgrammingLanguageDto programmingLanguageDto = new ProgrammingLanguageDto();
+
+        when(programmingLanguageRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(ProgrammingLanguageNotFoundException.class, () -> {
+            programmingLanguageService.updateProgrammingLanguage(id, programmingLanguageDto);
+        });
+    }
 }

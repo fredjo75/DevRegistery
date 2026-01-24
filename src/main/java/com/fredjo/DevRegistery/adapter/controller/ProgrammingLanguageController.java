@@ -18,7 +18,7 @@ import java.util.Optional;
  * REST controller for managing programming languages.
  */
 @RestController
-@RequestMapping("/programming_language")
+@RequestMapping("/v1/programming_language")
 @RequiredArgsConstructor
 public class ProgrammingLanguageController {
 
@@ -65,5 +65,43 @@ public class ProgrammingLanguageController {
     public ResponseEntity<Iterable<DeveloperDto>> getDevelopersByProgrammingLanguageId(@PathVariable Long id) {
         logger.info("Fetching developers for programming language with id: {}", id);
         return ResponseEntity.ok(programmingLanguageService.getDevelopersByProgrammingLanguageId(id));
+    }
+
+    /**
+     * Fetches all programming languages.
+     *
+     * @return the ResponseEntity with the list of ProgrammingLanguageDto
+     */
+    @GetMapping
+    public ResponseEntity<Iterable<ProgrammingLanguageDto>> getAllProgrammingLanguages() {
+        logger.info("Fetching all programming languages");
+        return ResponseEntity.ok(programmingLanguageService.getAllProgrammingLanguages());
+    }
+
+    /**
+     * Updates an existing programming language.
+     *
+     * @param id the ID of the programming language to update
+     * @param requestBody the updated programming language data transfer object
+     * @return the ResponseEntity with the updated ProgrammingLanguageDto
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ProgrammingLanguageDto> updateProgrammingLanguage(@PathVariable Long id, @Valid @RequestBody ProgrammingLanguageDto requestBody) {
+        logger.info("Updating programming language with id: {}", id);
+        ProgrammingLanguageDto updatedLanguage = programmingLanguageService.updateProgrammingLanguage(id, requestBody);
+        return ResponseEntity.ok(updatedLanguage);
+    }
+
+    /**
+     * Deletes a programming language by its ID.
+     *
+     * @param id the ID of the programming language to delete
+     * @return the ResponseEntity with status 204 No Content
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProgrammingLanguage(@PathVariable Long id) {
+        logger.info("Deleting programming language with id: {}", id);
+        programmingLanguageService.deleteProgrammingLanguageById(id);
+        return ResponseEntity.noContent().build();
     }
 }

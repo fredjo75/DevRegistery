@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +54,18 @@ public class DeveloperService {
         return StreamSupport.stream(developerRepository.findAll().spliterator(), false)
                 .map(developer -> modelMapper.map(developer, DeveloperDto.class))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Fetches all developers with pagination.
+     *
+     * @param pageable the pagination information
+     * @return a Page of DeveloperDto
+     */
+    public Page<DeveloperDto> getAllDevelopers(Pageable pageable) {
+        logger.info("Fetching all developers with pagination");
+        return developerRepository.findAll(pageable)
+                .map(developer -> modelMapper.map(developer, DeveloperDto.class));
     }
 
     /**
@@ -117,5 +131,26 @@ public class DeveloperService {
                     .collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Updates an existing developer.
+     *
+     * @param id the ID of the developer to update
+     * @param developerDto the updated developer data transfer object
+     * @return the updated DeveloperDto
+     * @throws DeveloperNotFoundException if the developer is not found
+     */
+    @Transactional
+    public DeveloperDto updateDeveloper(Long id, DeveloperDto developerDto) {
+        logger.info("Updating developer with id: {}", id);
+        Developer existingDeveloper = developerRepository.findById(id)
+                .orElseThrow(() -> new DeveloperNotFoundException("Developer not found with id: " + id));
+
+        existingDeveloper.setFirstName(developerDto.getFirstName());
+        existingDeveloper.setLastName(developerDto.getLastName());
+
+        Developer updatedDeveloper = developerRepository.save(existingDeveloper);
+        return modelMapper.map(updatedDeveloper, DeveloperDto.class);
     }
 }

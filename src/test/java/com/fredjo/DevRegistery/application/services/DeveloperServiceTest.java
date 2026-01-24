@@ -5,6 +5,7 @@ import com.fredjo.DevRegistery.application.dto.ProgrammingLanguageDto;
 import com.fredjo.DevRegistery.domain.entity.Developer;
 import com.fredjo.DevRegistery.domain.entity.ProgrammingLanguage;
 import com.fredjo.DevRegistery.infra.repository.DeveloperRepository;
+import com.fredjo.DevRegistery.utils.DeveloperNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -154,5 +155,57 @@ class DeveloperServiceTest {
         Iterable<ProgrammingLanguageDto> result = developerService.getLanguagesByDeveloperId(id);
 
         assertTrue(((List<ProgrammingLanguageDto>) result).isEmpty());
+    }
+
+    @Test
+    void updateDeveloper_updatesAndReturnsDeveloperDto_whenIdExists() {
+        Long id = 1L;
+        DeveloperDto developerDto = new DeveloperDto();
+        developerDto.setFirstName("Jane");
+        developerDto.setLastName("Smith");
+
+        Developer existingDeveloper = new Developer();
+        existingDeveloper.setId(id);
+        existingDeveloper.setFirstName("John");
+        existingDeveloper.setLastName("Doe");
+
+        Developer updatedDeveloper = new Developer();
+        updatedDeveloper.setId(id);
+        updatedDeveloper.setFirstName("Jane");
+        updatedDeveloper.setLastName("Smith");
+
+        when(developerRepository.findById(id)).thenReturn(Optional.of(existingDeveloper));
+        when(developerRepository.save(existingDeveloper)).thenReturn(updatedDeveloper);
+        when(modelMapper.map(updatedDeveloper, DeveloperDto.class)).thenReturn(developerDto);
+
+        DeveloperDto result = developerService.updateDeveloper(id, developerDto);
+
+        assertEquals("Jane", result.getFirstName());
+        assertEquals("Smith", result.getLastName());
+        verify(developerRepository, times(1)).save(existingDeveloper);
+    }
+
+    @Test
+    void updateDeveloper_throwsDeveloperNotFoundException_whenIdDoesNotExist() {
+        Long id = 1L;
+        DeveloperDto developerDto = new DeveloperDto();
+
+        when(developerRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(DeveloperNotFoundException.class, () -> {
+            developerService.updateDeveloper(id, developerDto);
+        });
+    }
+
+    @Test
+    void addLanguageToDeveloper_throwsDeveloperNotFoundException_whenIdDoesNotExist() {
+        Long id = 1L;
+        ProgrammingLanguageDto programmingLanguageDto = new ProgrammingLanguageDto();
+
+        when(developerRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(DeveloperNotFoundException.class, () -> {
+            developerService.addLanguageToDeveloper(id, programmingLanguageDto);
+        });
     }
 }
